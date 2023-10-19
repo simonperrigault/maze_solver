@@ -1,0 +1,21 @@
+liste ouverte = a explorer = priority queue avec la distance depuis depart+vers arrivee comme critère / ou dictionnaire / fonction pop_min
+liste ferme = visités = liste 
+
+On commence par le nœud de départ, c'est le nœud courant.
+On regarde tous ses nœuds voisins.
+Si un nœud voisin est un obstacle, on l'oublie.
+Si un nœud voisin est déjà dans la liste fermée, on l'oublie.
+Si un nœud voisin est déjà dans la liste ouverte, on met à jour la liste ouverte si le nœud dans la liste ouverte a une moins bonne qualité (et on n'oublie pas de mettre à jour son parent).
+Sinon, on ajoute le nœud voisin dans la liste ouverte avec comme parent le nœud courant.
+On cherche le meilleur nœud de toute la liste ouverte. Si la liste ouverte est vide, il n'y a pas de solution, fin de l'algorithme.
+On le met dans la liste fermée et on le retire de la liste ouverte.
+On réitère avec ce nœud comme nœud courant jusqu'à ce que le nœud courant soit le nœud de destination.
+
+
+algo jump point search
+prendre point moins cout de open_list
+chercher voisin naturels et forcés avec direction du parent
+chercher jump point pour chaque voisins
+ajouter successeurs dans open_list
+ajouter point du debut dans closed_list avec son parent
+si trouve arrivee, remonte chemin
