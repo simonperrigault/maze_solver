@@ -3,13 +3,13 @@ import tkinter as tk
 import math
 import time
 
-fichier = "cartes/carte cours.txt"
+fichier = "cartes/carte.txt"
 COULEUR_MUR = "grey"
 COULEUR_SOL = "white"
 COULEUR_FLECHE = "yellow"
 COLONNES_MAX = 200
 LIGNES_MAX = 100
-VITESSE = 5
+PERIODE_ANIM = 2
 
 class Fenetre:
     def __init__(self, carte, parcours="astar"):
@@ -77,7 +77,7 @@ class Fenetre:
                 self.canvas.after(task[1], self.changer_couleur, task[0], "lightblue")
             chemin = [(b*self.taille_carreau+self.taille_carreau//2, a*self.taille_carreau+self.taille_carreau//2) for (a,b) in chemin]
             self.canvas.after(k, self.ligne, chemin)
-            self.canvas.after(k+VITESSE*len(chemin), self.change_mode, "normal")
+            self.canvas.after(k+PERIODE_ANIM*len(chemin), self.change_mode, "normal")
             
     def dij(self):
         def pop_min(dict):
@@ -100,7 +100,7 @@ class Fenetre:
             deja_collectes[curr] = dist
             if curr != self.depart:
                 to_blue.append((self.carreaux[curr[0]][curr[1]], k))
-                k += VITESSE
+                k += PERIODE_ANIM
             for voi in self.graph[curr]:
                 long = Fenetre.distance(voi, curr)
                 nouv_dist = dist + long
@@ -109,7 +109,7 @@ class Fenetre:
                     chemins[voi] = chemins[curr]+[voi]
                     if voi == self.arrivee: return chemins[voi], k, to_green, to_blue
                     to_green.append((self.carreaux[voi[0]][voi[1]], k))
-                    k += VITESSE
+                    k += PERIODE_ANIM
         return None, 0, [], []
     
     def astar(self):
@@ -129,7 +129,7 @@ class Fenetre:
             curr = find_min(open_list)
             if curr != self.depart:
                 to_blue.append((self.carreaux[curr[0]][curr[1]], k))
-                k += VITESSE
+                k += PERIODE_ANIM
             for voisin in self.graph[curr]:
                 new_w = open_list[curr][0] + Fenetre.distance(curr, voisin)
                 distance = Fenetre.distance(voisin, self.arrivee)
@@ -145,7 +145,7 @@ class Fenetre:
                 if not voisin in open_list or new_w + distance < open_list[voisin][0]+open_list[voisin][1]:
                     open_list[voisin] = [new_w, distance, curr]
                     to_green.append((self.carreaux[voisin[0]][voisin[1]], k))
-                    k += VITESSE
+                    k += PERIODE_ANIM
                 
             closed_list[curr] = open_list[curr][2]
             open_list.pop(curr)
@@ -157,7 +157,7 @@ class Fenetre:
     def ligne(self, chemin):
         if len(chemin) >= 2:
             self.canvas.create_line(chemin[:2], fill=COULEUR_FLECHE, width=2)
-            self.canvas.after(VITESSE, self.ligne, chemin[1:])
+            self.canvas.after(PERIODE_ANIM, self.ligne, chemin[1:])
     
     # def jump_point_search(self):
     #     def jump(suiv,node):
