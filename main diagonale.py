@@ -3,7 +3,7 @@ import tkinter as tk
 import math
 import time
 
-fichier = "C:/Users/simon/Desktop/leetcode/projet labyrinthe/cartes/carte.txt"
+fichier = "cartes/carte cours.txt"
 COULEUR_MUR = "grey"
 COULEUR_SOL = "white"
 COULEUR_FLECHE = "yellow"
