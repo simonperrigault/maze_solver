@@ -174,7 +174,6 @@ class Fenetre:
             return som_min
         
         def natural_neigh(curr, dx, dy):
-            parent = (curr[0] - dx, curr[1] - dy)
             res = []
             if dx*dy == 0: # cardinal
                 if self.verif_coor(curr[0]+dx, curr[1]+dy) and self.carte[curr[0]+dx][curr[1]+dy] == "-":
@@ -192,14 +191,14 @@ class Fenetre:
             parent = (curr[0] - dx, curr[1] - dy)
             res = []
             if dx*dy == 0:
-                if self.verif_coor(curr[0]-dy, curr[1]+dx) and self.carte[curr[0]-dy][curr[1]+dx] == "#" and self.verif_coor(curr[0]-dy+dx, curr[1]+dx+dy) and self.carte[curr[0]-dy+dx][curr[1]+dx+dy] == "-":
+                if self.verif_coor(curr[0]-dy, curr[1]+dx) and self.carte[curr[0]-dy][curr[1]+dx] == "#" and self.verif_coor(curr[0]-dy+dx, curr[1]+dx+dy) and self.carte[curr[0]+dx][curr[1]+dy] == "-" and self.carte[curr[0]-dy+dx][curr[1]+dx+dy] == "-":
                     res.append((curr[0]-dy+dx, curr[1]+dx+dy))
-                if self.verif_coor(curr[0]+dy, curr[1]-dx) and self.carte[curr[0]+dy][curr[1]-dx] == "#" and self.verif_coor(curr[0]+dy+dx, curr[1]-dx+dy) and self.carte[curr[0]+dy+dx][curr[1]-dx+dy] == "-":
+                if self.verif_coor(curr[0]+dy, curr[1]-dx) and self.carte[curr[0]+dy][curr[1]-dx] == "#" and self.verif_coor(curr[0]+dy+dx, curr[1]-dx+dy) and self.carte[curr[0]+dx][curr[1]+dy] == "-" and self.carte[curr[0]+dy+dx][curr[1]-dx+dy] == "-":
                     res.append((curr[0]+dy+dx, curr[1]-dx+dy))
             else:
-                if self.verif_coor(parent[0]+dx, parent[1]) and self.carte[parent[0]+dx][parent[1]] == "#" and self.verif_coor(parent[0]+2*dx, parent[1]) and self.carte[parent[0]+2*dx][parent[1]] == "-":
+                if self.verif_coor(parent[0]+dx, parent[1]) and self.carte[parent[0]+dx][parent[1]] == "#" and self.verif_coor(parent[0]+2*dx, parent[1]) and self.carte[parent[0]+2*dx][parent[1]+dy] == "-" and self.carte[parent[0]+2*dx][parent[1]] == "-":
                     res.append((parent[0]+2*dx, parent[1]))
-                if self.verif_coor(parent[0], parent[1]+dy) and self.carte[parent[0]][parent[1]+dy] == "#" and self.verif_coor(parent[0], parent[1]+2*dy) and self.carte[parent[0]][parent[1]+2*dy] == "-":
+                if self.verif_coor(parent[0], parent[1]+dy) and self.carte[parent[0]][parent[1]+dy] == "#" and self.verif_coor(parent[0], parent[1]+2*dy) and self.carte[parent[0]+dx][parent[1]+2*dy] == "-" and self.carte[parent[0]][parent[1]+2*dy] == "-":
                     res.append((parent[0], parent[1]+2*dy))
             return res
         
