@@ -1,9 +1,9 @@
 # Pathfinding algorithms
 
-![Contributors](https://img.shields.io/github/contributors/simonperrigault/labyrinthe?style=plastic)
+![Contributors](https://img.shields.io/github/contributors/simonperrigault/labyrinthe)
 ![Forks](https://img.shields.io/github/forks/simonperrigault/labyrinthe)
 ![Stars](https://img.shields.io/github/stars/simonperrigault/labyrinthe)
-![Licence](https://img.shields.io/github/license/simonperrigault/labyrinthe)
+![GitHub License](https://img.shields.io/github/license/simonperrigault/labyrinthe)
 ![Issues](https://img.shields.io/github/issues/simonperrigault/labyrinthe)
 
 ## Description
