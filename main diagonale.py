@@ -6,10 +6,11 @@ import time
 fichier = "cartes/carte.txt"
 COULEUR_MUR = "grey"
 COULEUR_SOL = "white"
-COULEUR_FLECHE = "yellow"
+COULEUR_FLECHE = "black"
 COLONNES_MAX = 200
 LIGNES_MAX = 100
 PERIODE_ANIM = 2
+TAILLE_FLECHE = 5
 
 class Fenetre:
     def __init__(self, carte, parcours="astar"):
@@ -34,6 +35,7 @@ class Fenetre:
         self.choix_parcours = tk.StringVar(value=parcours)
         tk.Radiobutton(self.frame, text="A*",font=("Arial", 16), variable=self.choix_parcours, value="astar", command=self.again).pack(side="left")
         tk.Radiobutton(self.frame, text="Dijkstra",font=("Arial", 16), variable=self.choix_parcours, value="dij", command=self.again).pack(side="left")
+        tk.Radiobutton(self.frame, text="JPS",font=("Arial", 16), variable=self.choix_parcours, value="jps", command=self.again).pack(side="left")
         self.label_time = tk.Label(self.frame, text=f"Temps d'exécution : 0", font=("Arial", 14))
         self.label_time.pack(side="left", padx=20)
 
@@ -64,10 +66,15 @@ class Fenetre:
             self.canvas.itemconfigure(id, fill="red")
             self.creer_graph()
             debut = time.time()
-            chemin, k, to_green, to_blue = self.astar() if self.choix_parcours.get() == "astar" else self.dij()
+            if self.choix_parcours.get() == "jps":
+                chemin, k, to_green, to_blue = self.jump_point()
+            elif self.choix_parcours.get() == "dij":
+                chemin, k, to_green, to_blue = self.dij()
+            else:
+                chemin, k, to_green, to_blue = self.astar()
             self.label_time["text"] = f"Temps d'exécution : {time.time()-debut : .4f} s"
             if chemin is None:
-                print("none")
+                print("Aucun chemin trouvé")
                 self.again()
                 return
             self.change_mode("disabled")
@@ -150,13 +157,113 @@ class Fenetre:
             closed_list[curr] = open_list[curr][2]
             open_list.pop(curr)
         return None, 0, [], []
+    
+    def jump_point(self):
+        open_list = {self.depart: (0, 0, None)} # sommet : [distance depart, distance arrivee, parent]
+        closed_list = {}
+        to_green = []
+        to_blue = []
+        k = 0
+        
+        def find_min(dic):
+            som_min, mini = (0,0), math.inf
+            for som, tup in dic.items():
+                if tup[0]+tup[1] < mini:
+                    mini = tup[0]+tup[1]
+                    som_min = som
+            return som_min
+        
+        def natural_neigh(curr, dx, dy):
+            parent = (curr[0] - dx, curr[1] - dy)
+            res = []
+            if dx*dy == 0: # cardinal
+                if self.verif_coor(curr[0]+dx, curr[1]+dy) and self.carte[curr[0]+dx][curr[1]+dy] == "-":
+                    res.append((curr[0]+dx, curr[1]+dy))
+            else:
+                if self.verif_coor(curr[0]+dx, curr[1]+dy) and self.carte[curr[0]+dx][curr[1]+dy] == "-":
+                    res.append((curr[0]+dx, curr[1]+dy))
+                if self.verif_coor(curr[0], curr[1]+dy) and self.carte[curr[0]][curr[1]+dy] == "-":
+                    res.append((curr[0], curr[1]+dy))
+                if self.verif_coor(curr[0]+dx, curr[1]) and self.carte[curr[0]+dx][curr[1]] == "-":
+                    res.append((curr[0]+dx, curr[1]))
+            return res
+        
+        def forced_neigh(curr, dx, dy):
+            parent = (curr[0] - dx, curr[1] - dy)
+            res = []
+            if dx*dy == 0:
+                if self.verif_coor(curr[0]-dy, curr[1]+dx) and self.carte[curr[0]-dy][curr[1]+dx] == "#" and self.verif_coor(curr[0]-dy+dx, curr[1]+dx+dy) and self.carte[curr[0]-dy+dx][curr[1]+dx+dy] == "-":
+                    res.append((curr[0]-dy+dx, curr[1]+dx+dy))
+                if self.verif_coor(curr[0]+dy, curr[1]-dx) and self.carte[curr[0]+dy][curr[1]-dx] == "#" and self.verif_coor(curr[0]+dy+dx, curr[1]-dx+dy) and self.carte[curr[0]+dy+dx][curr[1]-dx+dy] == "-":
+                    res.append((curr[0]+dy+dx, curr[1]-dx+dy))
+            else:
+                if self.verif_coor(parent[0]+dx, parent[1]) and self.carte[parent[0]+dx][parent[1]] == "#" and self.verif_coor(parent[0]+2*dx, parent[1]) and self.carte[parent[0]+2*dx][parent[1]] == "-":
+                    res.append((parent[0]+2*dx, parent[1]))
+                if self.verif_coor(parent[0], parent[1]+dy) and self.carte[parent[0]][parent[1]+dy] == "#" and self.verif_coor(parent[0], parent[1]+2*dy) and self.carte[parent[0]][parent[1]+2*dy] == "-":
+                    res.append((parent[0], parent[1]+2*dy))
+            return res
+        
+        def jump(curr, dx, dy):
+            n = (curr[0]+dx, curr[1]+dy)
+            if n[0] < 0 or n[1] < 0 or n[0] > len(self.carte)-1 or n[1] > len(self.carte[0])-1 or self.carte[n[0]][n[1]] == "#":
+                return None
+            if self.verif_coor(curr[0]-dx, curr[1]-dy) and self.carte[curr[0]-dx][curr[1]] == "#" and self.carte[curr[0]][curr[1]-dy] == "#":
+                return None
+            if n == self.arrivee:
+                return n
+            if len(forced_neigh(n, dx, dy)) != 0:
+                return n
+            if dx*dy != 0:
+                if jump(n, dx, 0) is not None:
+                    return n
+                if jump(n, 0, dy) is not None:
+                    return n
+            return jump(n, dx, dy)
+        
+        def add_successors(curr, parent):
+            nonlocal k
+            if parent is None:
+                for n in self.graph[curr]:
+                    open_list[n] = (Fenetre.distance(curr, n), Fenetre.distance(n, self.arrivee), curr)
+                    to_green.append((self.carreaux[n[0]][n[1]], k))
+                    k += PERIODE_ANIM
+            else:
+                dx = curr[0] - parent[0]
+                dx = 0 if dx == 0 else dx//abs(dx)
+                dy = curr[1] - parent[1]
+                dy = 0 if dy == 0 else dy//abs(dy)
+                neigh = natural_neigh(curr, dx, dy) + forced_neigh(curr, dx, dy)
+                for n in neigh:
+                    n = jump(curr, n[0]-curr[0], n[1]-curr[1])
+                    if n is not None:
+                        open_list[n] = (open_list[curr][0] + Fenetre.distance(curr, n), Fenetre.distance(n, self.arrivee), curr)
+                        if n == self.arrivee: continue
+                        to_green.append((self.carreaux[n[0]][n[1]], k))
+                        k += PERIODE_ANIM
+        
+        while len(open_list) > 0:
+            curr = find_min(open_list)
+            if curr == self.arrivee:
+                closed_list[curr] = open_list[curr][2]
+                chemin = [self.arrivee]
+                while chemin[0] != self.depart:
+                    chemin.insert(0, closed_list[chemin[0]])
+                return chemin, k, to_green, to_blue
+            if curr != self.depart:
+                to_blue.append((self.carreaux[curr[0]][curr[1]], k))
+                k += PERIODE_ANIM
+            add_successors(curr, open_list[curr][2])
+            closed_list[curr] = open_list[curr][2]
+            open_list.pop(curr)
+        return None, 0, [], []
+        
 
     def changer_couleur(self, id, couleur):
         self.canvas.itemconfigure(id, fill=couleur)
     
     def ligne(self, chemin):
         if len(chemin) >= 2:
-            self.canvas.create_line(chemin[:2], fill=COULEUR_FLECHE, width=2)
+            self.canvas.create_line(chemin[:2], fill=COULEUR_FLECHE, width=TAILLE_FLECHE)
             self.canvas.after(PERIODE_ANIM, self.ligne, chemin[1:])
     
     
@@ -187,6 +294,9 @@ class Fenetre:
                     if i < len(self.carte)-1 and j > 0 and self.carte[i+1][j-1] == "-" and (self.carte[i+1][j] == "-" or self.carte[i][j-1] == "-"): self.graph[(i,j)].append((i+1, j-1))
                     if i < len(self.carte)-1 and self.carte[i+1][j] == "-": self.graph[(i,j)].append((i+1, j))
                     if i < len(self.carte)-1 and j < len(self.carte[i])-1 and self.carte[i+1][j+1] == "-" and (self.carte[i+1][j] == "-" or self.carte[i][j+1] == "-"): self.graph[(i,j)].append((i+1, j+1))
+    
+    def verif_coor(self, x, y):
+        return 0 <= x < len(self.carte) and 0 <= y < len(self.carte[0])
     
     @staticmethod
     def distance(depart, arrivee):
