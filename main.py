@@ -3,7 +3,7 @@ import tkinter as tk
 import math
 import time
 
-fichier = "cartes/carte.txt"
+file = "maps/map.txt"
 COULEUR_MUR = "grey"
 COULEUR_SOL = "white"
 COULEUR_FLECHE = "black"
@@ -36,12 +36,12 @@ class Fenetre:
         tk.Radiobutton(self.frame, text="A*",font=("Arial", 16), variable=self.choix_parcours, value="astar", command=self.again).pack(side="left")
         tk.Radiobutton(self.frame, text="Dijkstra",font=("Arial", 16), variable=self.choix_parcours, value="dij", command=self.again).pack(side="left")
         tk.Radiobutton(self.frame, text="JPS",font=("Arial", 16), variable=self.choix_parcours, value="jps", command=self.again).pack(side="left")
-        self.label_time = tk.Label(self.frame, text=f"Temps d'exécution : 0", font=("Arial", 14))
+        self.label_time = tk.Label(self.frame, text=f"Execution time : 0", font=("Arial", 14))
         self.label_time.pack(side="left", padx=20)
 
-        tk.Button(self.frame, text="Again", command=self.again, bg="lightblue", width=50).pack(side="right",fill="both", padx=20)
+        tk.Button(self.frame, text="Restart", command=self.again, bg="lightblue", width=50).pack(side="right",fill="both", padx=20)
 
-        tk.Button(self.frame, text="Changer la carte", bg="lightblue", width=50, command=self.dessin_carte).pack(side="right", fill="both", padx=20)
+        tk.Button(self.frame, text="Change map", bg="lightblue", width=50, command=self.dessin_carte).pack(side="right", fill="both", padx=20)
 
         self.fenetre.mainloop()
     
@@ -72,9 +72,9 @@ class Fenetre:
                 chemin, k, to_green, to_blue = self.dij()
             else:
                 chemin, k, to_green, to_blue = self.astar()
-            self.label_time["text"] = f"Temps d'exécution : {time.time()-debut : .4f} s"
+            self.label_time["text"] = f"Execution time : {time.time()-debut : .4f} s"
             if chemin is None:
-                print("Aucun chemin trouvé")
+                print("No path found")
                 self.again()
                 return
             self.change_mode("disabled")
@@ -331,20 +331,21 @@ class DessinCarte:
         frame = tk.Frame(self.fenetre)
         frame.pack(side="bottom", fill="both")
 
-        tk.Label(frame, text=f"Nombre de lignes :").pack(side="left", padx=20)
+        tk.Label(frame, text=f"Number of rows :").pack(side="left", padx=20)
         tk.Scale(frame, variable=self.nombre_lignes, from_=2, to=LIGNES_MAX, command=self.changer_lignes, orient="horizontal").pack(side="left")
         tempspin = tk.Spinbox(frame, textvariable=self.nombre_lignes, from_=2, to=LIGNES_MAX, command=lambda : self.changer_lignes(self.nombre_lignes.get()))
         tempspin.bind("<Return>", lambda event : self.changer_lignes(self.nombre_lignes.get()))
         tempspin.pack(side="left")
 
-        tk.Label(frame, text=f"Nombre de colonnes :").pack(side="left", padx=20)
+        tk.Label(frame, text=f"Number of columns :").pack(side="left", padx=20)
         tk.Scale(frame, variable=self.nombre_colonnes, from_=2, to=COLONNES_MAX, command=self.changer_colonnes, orient="horizontal").pack(side="left")
         tempspin = tk.Spinbox(frame, textvariable=self.nombre_colonnes, from_=2, to=COLONNES_MAX, command=lambda : self.changer_colonnes(self.nombre_colonnes.get()))
         tempspin.bind("<Return>", lambda event : self.changer_colonnes(self.nombre_colonnes.get()))
         tempspin.pack(side="left")
 
-        tk.Button(frame, text="Confirmer", bg="lightblue", width=50, height=2, command=self.confirmer).pack(side="right", fill="both", padx=20)
-        tk.Button(frame, text="Effacer", bg="lightblue", width=50, height=2, command=self.effacer_carte).pack(side="right", fill="both", padx=20)
+        tk.Button(frame, text="Discard", bg="lightblue", width=50, height=2, command=lambda write=False : self.close(write)).pack(side="right", fill="both", padx=20)
+        tk.Button(frame, text="Confirm", bg="lightblue", width=50, height=2, command=lambda write=True : self.close(write)).pack(side="right", fill="both", padx=20)
+        tk.Button(frame, text="Clear", bg="lightblue", width=50, height=2, command=self.effacer_carte).pack(side="right", fill="both", padx=20)
 
         self.fenetre.mainloop()
     
@@ -395,14 +396,18 @@ class DessinCarte:
         self.carte = ["-"*len(row) for row in self.carte]
         self.creer_carte()
     
-    def confirmer(self):
-        with open(fichier, "w") as f:
-            for row in self.carte:
-                f.write(row)
-                f.write("\n")
+    def close(self, write):
+        if write:
+            with open(file, "w") as f:
+                for row in self.carte:
+                    f.write(row)
+                    f.write("\n")
+        else:
+            with open(file, "r") as f:
+                self.carte = [line.strip() for line in f.readlines()]
         self.fenetre.destroy()
         Fenetre(self.carte)
 
-with open(fichier, "r") as f:
+with open(file, "r") as f:
     carte = [line.strip() for line in f.readlines()]
 Fenetre(carte)
