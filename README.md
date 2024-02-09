@@ -15,7 +15,7 @@ It was a part of a college project that I pushed a little too far but it was rea
   * Add walls by leftclicking on the tiles (or maintaining leftclick and dragging)
   * Remove walls by rightclicking on existing walls (or maintaining rightclick and dragging)
   * Reset the map by clicking on the "Clear map" button
-  * Confirm your map with the "Confirm" button, your map is saved in maps/map.txt
+  * Confirm your map with the "Confirm" button or discard using the "Discard" button, your map is saved in maps/map.txt
 * Choose the algorithm you want to use at the bottom left of the window
 * Choose a start point by clicking on an available tile (not a wall)
 * Then choose an end point the same way
