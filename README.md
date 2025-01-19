@@ -1,11 +1,5 @@
 # Pathfinding algorithms
 
-![Contributors](https://img.shields.io/github/contributors/simonperrigault/labyrinthe)
-![Forks](https://img.shields.io/github/forks/simonperrigault/labyrinthe)
-![Stars](https://img.shields.io/github/stars/simonperrigault/labyrinthe)
-![GitHub License](https://img.shields.io/github/license/simonperrigault/labyrinthe)
-![Issues](https://img.shields.io/github/issues/simonperrigault/labyrinthe)
-
 ## Description
 
 This application lets you create your own labyrinth and then observe how different pathfinding algorithms work to find the optimal way between two points in your map. 
